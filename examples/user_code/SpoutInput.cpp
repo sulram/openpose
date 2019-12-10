@@ -5,7 +5,7 @@
 #include "SpoutInput.hpp"
 #include <GLFW/glfw3.h>
 
-using DatumArray = std::vector<op::Datum>;
+using DatumArray = std::vector<std::shared_ptr<op::Datum>>;
 using DatumArrayRef = std::shared_ptr<DatumArray>;
 
 static GLFWwindow* window;
@@ -32,7 +32,7 @@ static void logMat(const cv::Mat& mat, const std::string prepend)
 	s << " ch: " << mat.channels();
 	s << " dep: " << mat.depth();
 	s << " type: " << mat.type();
-	op::log(s.str());
+	op::opLog(s.str());
 }
 
 SpoutInput::SpoutInput(const std::string& name) :
@@ -94,7 +94,7 @@ DatumArrayRef SpoutInput::workProducer()
 	if (!isInitialized)
 	{
 		isInitialized = initializeReceiver();
-		datum.cvInputData = makeGreenMat();
+		datum->cvInputData = OP_CV2OPMAT(makeGreenMat());
 		resetBuffer();
 		return datumsPtr;
 	}
@@ -113,7 +113,7 @@ DatumArrayRef SpoutInput::workProducer()
 			// Need to convert if PC does not support GL_BGR_EXT
 			//cv::cvtColor(spoutMat, spoutMat, CV_RGB2BGR);
 
-			spoutMat.copyTo(datum.cvInputData);
+			spoutMat.copyTo(OP_OP2CVMAT(datum->cvInputData));
 
 			// This line needs when debug mode, Why???
 			//cv::imshow("Spout Input", spoutMat);
@@ -132,9 +132,9 @@ DatumArrayRef SpoutInput::workProducer()
 
 
 	// If empty frame -> return nullptr
-	if (datum.cvInputData.empty())
+	if (datum->cvInputData.empty())
 	{
-		datum.cvInputData = makeGreenMat();
+		datum->cvInputData = OP_CV2OPMAT(makeGreenMat());
 		//this->stop();
 		//datumsPtr = nullptr;
 	}
@@ -148,7 +148,7 @@ void SpoutInput::printSourceNames()
 	for (int i = 0; i < count; i++)
 	{
 		receiver.GetSenderName(i, name);
-		op::log("sender " + std::to_string(i) + ": " + std::string(name));
+		op::opLog("sender " + std::to_string(i) + ": " + std::string(name));
 	}
 }
 

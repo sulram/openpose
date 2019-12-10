@@ -6,13 +6,13 @@
 
 #include "SpoutReceiver.h"
 
-class SpoutInput : public op::WorkerProducer<std::shared_ptr<std::vector<op::Datum>>>
+class SpoutInput : public op::WorkerProducer<std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>>>
 {
 public:
 	SpoutInput(const std::string& name);
 	virtual ~SpoutInput();
 	void initializationOnThread();
-	std::shared_ptr<std::vector<op::Datum>> workProducer();
+	std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>> workProducer();
 	void printSourceNames();
 
 private:

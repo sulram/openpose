@@ -3,7 +3,7 @@
 #include <openpose/headers.hpp>
 #include "Tracker.h"
 
-class TrackerPostProcessing : public op::Worker<std::shared_ptr<std::vector<op::Datum>>>
+class TrackerPostProcessing : public op::Worker<std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>>>
 {
 	struct Target
 	{
@@ -18,7 +18,7 @@ public:
 
     void initializationOnThread();
 
-    void work(std::shared_ptr<std::vector<op::Datum>>& datumsPtr);
+    void work(std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>>& datumsPtr);
 
 private:
 	bool drawInfo;

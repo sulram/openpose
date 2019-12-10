@@ -6,7 +6,7 @@
 #include <openpose/headers.hpp>
 
 
-class OscOutput : public op::WorkerConsumer<std::shared_ptr<std::vector<op::Datum>>>
+class OscOutput : public op::WorkerConsumer<std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>>>
 {
 
 public:
@@ -30,7 +30,7 @@ public:
 
 	void initializationOnThread() {}
 
-	void workConsumer(const std::shared_ptr<std::vector<op::Datum>>& datumsPtr)
+	void workConsumer(const std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>>& datumsPtr)
 	{
 		try {
 			if (datumsPtr == nullptr || datumsPtr->empty()) {
@@ -38,12 +38,12 @@ public:
 				return;
 			}
 
-			sendOSC(datumsPtr->at(0));
+			sendOSC(*datumsPtr->at(0));
 
 			if (showImage)
 			{
 				// Display rendered output image
-				cv::Mat mat = datumsPtr->at(0).cvOutputData;
+				cv::Mat mat = OP_OP2CVMAT(datumsPtr->at(0)->cvOutputData);
 				if (!mat.empty())
 				{
 					cv::imshow("Osc Output", mat);
@@ -59,7 +59,7 @@ public:
 		}
 		catch (const std::exception& e) {
 			//this->stop();
-			op::log(e.what());
+			op::opLog(e.what());
 			op::error(e.what(), __LINE__, __FUNCTION__, __FILE__);
 		}
 	}

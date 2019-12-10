@@ -7,7 +7,7 @@
 using namespace std::chrono;
 
 // Implements simple centroid tracking
-using DatumArray = std::vector<op::Datum>;
+using DatumArray = std::vector<std::shared_ptr<op::Datum>>;
 using DatumArrayRef = std::shared_ptr<DatumArray>;
 
 namespace ofxCv
@@ -100,7 +100,7 @@ void TrackerPostProcessing::work(DatumArrayRef& datumsPtr)
 	// Process all queue
 	for (auto& datum : *datumsPtr)
 	{
-		const auto& keypoints = datum.poseKeypoints;
+		const auto& keypoints = datum->poseKeypoints;
 		const int persons = keypoints.getSize(0);
 		//const int parts = keypoints.getSize(1);
 		const int dimensions = keypoints.getSize(2); // ignore score data
@@ -122,11 +122,11 @@ void TrackerPostProcessing::work(DatumArrayRef& datumsPtr)
 		{
 			ids[{0, i}] = tracker.getLabelFromIndex(i);
 		}
-		datum.poseIds = ids;
+		datum->poseIds = ids;
 
 		if (drawInfo)
 		{
-			cv::Mat& image = datum.cvOutputData;
+			cv::Mat& image = OP_OP2CVMAT(datum->cvOutputData);
 			const cv::Size2f size(image.cols, image.rows);
 
 			for (int i = 0; i < persons; i++)
@@ -134,8 +134,10 @@ void TrackerPostProcessing::work(DatumArrayRef& datumsPtr)
 				// Draw debug text
 				const auto& bbox = bboxes.at(i);
 				const cv::Point2f p = (bbox.tl() + bbox.br()) / 2;
-				cv::putText(image, std::to_string(ids[{0, i}]), cv::Point2f(p.x * size.width, p.y * size.height),
-					CV_FONT_HERSHEY_PLAIN, 1.0, { 0, 255, 0 });
+				cv::putText(image,
+					std::to_string(ids[{0, i}]),
+					cv::Point2f(p.x * size.width, p.y * size.height),
+					cv::FONT_HERSHEY_PLAIN, 1.0, { 0, 255, 0 });
 			}
 		}
 

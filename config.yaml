@@ -1,0 +1,19 @@
+%YAML:1.1
+
+osc:
+  # address: localhost
+  address: "192.168.11.63"
+  port: 8888
+spout:
+  name: DeckLink Mini Recorder 
+tracker:
+  # How many frames will alive
+  persistence: 10
+  # The maximum distance to consider as the same target
+  maxDistance: 0.5 
+openpose:
+  renderBone: Yes 
+  maxTargets: 50
+  # NET input size, if -1 automaticaly set by aspect ratio
+  netWidth: -1
+  netHeight: 368

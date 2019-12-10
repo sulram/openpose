@@ -99,7 +99,7 @@ int spout_osc()
 	// Pose
 	const op::WrapperStructPose pose
 	{
-		true,
+		op::PoseMode::Enabled,
 		op::Point<int>(config.openpose.netWidth, config.openpose.netHeight), // Net input size (Horizontal)
 		//op::Point<int>(368, -1), // Net input size (Vertical)
 		op::Point<int>(-1, -1), // Output size
@@ -110,10 +110,10 @@ int spout_osc()
 		config.openpose.renderBone ? op::RenderMode::Cpu : op::RenderMode::None, // render_pose
 		op::PoseModel::BODY_25, // Model file
 		true, // result blending
-		0.6f, // Blending factor for the body part rendering
-		0.7f, // Blending factor (range 0-1) between heatmap and original frame
+		op::POSE_DEFAULT_ALPHA_KEYPOINT, // Blending factor for the body part rendering
+		op::POSE_DEFAULT_ALPHA_HEAT_MAP, // Blending factor (range 0-1) between heatmap and original frame
 		0, // part_to_show
-		"models", // Models folder
+		"models/", // Models folder
 		{}, // Heatmap types (no heatmap)
 		op::ScaleMode::UnsignedChar, // Heatmap scale 
 		false, // part_candidates
@@ -121,6 +121,9 @@ int spout_osc()
 		config.openpose.maxTargets, // number_people_max
 		false, // maximize_positives
 		-1, // fps_max
+		"", // protoTxtPath
+		"", // caffeModelPath
+		0.f, // upsamplingRatio
 		false // enableGoogleLogging 
 	};
 	wrapper.configure(pose);
@@ -133,7 +136,7 @@ int spout_osc()
 
 int main(int argc, char *argv[])
 {
-	op::log(argv[0]);
+	op::opLog(argv[0]);
 	try
 	{
 		//test();
@@ -142,7 +145,7 @@ int main(int argc, char *argv[])
 	}
 	catch (const std::exception& e)
 	{
-		op::log(e.what());
+		op::opLog(e.what());
 		return -1;
 	}
 }
