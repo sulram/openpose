@@ -1,4 +1,7 @@
 #include <openpose/filestream/udpSender.hpp>
+
+#undef USE_ASIO
+
 #ifdef USE_ASIO
     #include <iostream>
     #include <asio.hpp>

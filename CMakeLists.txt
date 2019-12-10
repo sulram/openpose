@@ -313,7 +313,7 @@ option(DOWNLOAD_FACE_MODEL "Download face model." ON)
 option(DOWNLOAD_HAND_MODEL "Download hand model." ON)
 
 # Asio
-# option(USE_ASIO "Include Asio header-only library." OFF)
+option(USE_ASIO "Include Asio header-only library." OFF)
 
 # More options
 option(BUILD_EXAMPLES "Build OpenPose examples." ON)
