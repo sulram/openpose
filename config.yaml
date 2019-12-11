@@ -1,8 +1,8 @@
 %YAML:1.1
 
 osc:
-  # address: localhost
-  address: "192.168.11.63"
+  address: localhost
+  # address: "192.168.11.63"
   port: 8888
 spout:
   name: DeckLink Mini Recorder 
