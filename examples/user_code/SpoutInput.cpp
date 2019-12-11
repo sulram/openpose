@@ -15,9 +15,9 @@ static void error_callback(int error, const char* description)
 	fprintf(stderr, "Error: %s\n", description);
 }
 
-cv::Mat makeGreenMat(const int width = 1280, const int height = 720)
+static op::Matrix makeGreenMat(const int width = 1280, const int height = 720)
 {
-	return cv::Mat(height, width, CV_8UC3, cv::Scalar(0, 255, 0));
+	return OP_CV2OPMAT(cv::Mat(height, width, CV_8UC3, cv::Scalar(0, 255, 0)));
 }
 
 
@@ -87,14 +87,14 @@ DatumArrayRef SpoutInput::workProducer()
 
 	// Create new datum
 	auto datumsPtr = std::make_shared<DatumArray>();
-	datumsPtr->emplace_back();
-	auto& datum = datumsPtr->at(0);
+	auto datum = std::make_shared<op::Datum>();
+	datumsPtr->push_back(datum);
 
 	// Try Initialize
 	if (!isInitialized)
 	{
 		isInitialized = initializeReceiver();
-		datum->cvInputData = OP_CV2OPMAT(makeGreenMat());
+		datum->cvInputData = makeGreenMat();
 		resetBuffer();
 		return datumsPtr;
 	}
@@ -112,11 +112,13 @@ DatumArrayRef SpoutInput::workProducer()
 		{
 			// Need to convert if PC does not support GL_BGR_EXT
 			//cv::cvtColor(spoutMat, spoutMat, CV_RGB2BGR);
+			
+			datum->cvInputData = OP_CV2OPCONSTMAT(spoutMat);
 
-			spoutMat.copyTo(OP_OP2CVMAT(datum->cvInputData));
-
+#ifndef NDEBUG // NOT Debug == DEBUG mode
 			// This line needs when debug mode, Why???
-			//cv::imshow("Spout Input", spoutMat);
+			cv::imshow("Spout Input", spoutMat);
+#endif
 		}
 	}
 
@@ -134,9 +136,7 @@ DatumArrayRef SpoutInput::workProducer()
 	// If empty frame -> return nullptr
 	if (datum->cvInputData.empty())
 	{
-		datum->cvInputData = OP_CV2OPMAT(makeGreenMat());
-		//this->stop();
-		//datumsPtr = nullptr;
+		datum->cvInputData = makeGreenMat();
 	}
 	return datumsPtr;
 }

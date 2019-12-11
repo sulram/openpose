@@ -126,21 +126,23 @@ void TrackerPostProcessing::work(DatumArrayRef& datumsPtr)
 
 		if (drawInfo)
 		{
-			cv::Mat& image = OP_OP2CVMAT(datum->cvOutputData);
-			const cv::Size2f size(image.cols, image.rows);
-
-			for (int i = 0; i < persons; i++)
+			cv::Mat* image = (cv::Mat*) datum->cvOutputData.getCvMat();
+			if (!image->empty())
 			{
-				// Draw debug text
-				const auto& bbox = bboxes.at(i);
-				const cv::Point2f p = (bbox.tl() + bbox.br()) / 2;
-				cv::putText(image,
-					std::to_string(ids[{0, i}]),
-					cv::Point2f(p.x * size.width, p.y * size.height),
-					cv::FONT_HERSHEY_PLAIN, 1.0, { 0, 255, 0 });
+				const cv::Size2f size(image->cols, image->rows);
+
+				for (int i = 0; i < persons; i++)
+				{
+					// Draw debug text
+					const auto& bbox = bboxes.at(i);
+					const cv::Point2f p = (bbox.tl() + bbox.br()) / 2;
+					cv::putText(*image,
+						std::to_string(ids[{0, i}]),
+						cv::Point2f(p.x * size.width, p.y * size.height),
+						cv::FONT_HERSHEY_PLAIN, 1.0, { 0, 255, 0 });
+				}
 			}
 		}
-
 	}
 
 }

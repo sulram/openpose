@@ -32,21 +32,22 @@ public:
 
 	void workConsumer(const std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>>& datumsPtr)
 	{
+		if (datumsPtr == nullptr || datumsPtr->empty()) {
+			// No human in the image
+			return;
+		}
+
 		try {
-			if (datumsPtr == nullptr || datumsPtr->empty()) {
-				// No human in the image
-				return;
-			}
 
 			sendOSC(*datumsPtr->at(0));
 
 			if (showImage)
 			{
 				// Display rendered output image
-				cv::Mat mat = OP_OP2CVMAT(datumsPtr->at(0)->cvOutputData);
-				if (!mat.empty())
+				op::Matrix opmat = datumsPtr->at(0)->cvOutputData;
+				if (!opmat.empty())
 				{
-					cv::imshow("Osc Output", mat);
+					cv::imshow("Osc Output", OP_OP2CVMAT(opmat));
 				}
 
 				// Display image and sleeps at least 1 ms (it usually sleeps ~5-10 msec to display the image)
