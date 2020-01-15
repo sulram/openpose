@@ -58,7 +58,7 @@ public:
 				}
 			}
 		}
-		catch (const std::exception& e) {
+		catch (const std::exception & e) {
 			//this->stop();
 			op::opLog(e.what());
 			op::error(e.what(), __LINE__, __FUNCTION__, __FILE__);
@@ -80,38 +80,48 @@ private:
 		const int persons = keypoints.getSize(0);
 		const int parts = keypoints.getSize(1);
 		const int dimensions = keypoints.getSize(2) - 1; // ignore score data
-		if (dimensions != 2)
-		{
-			// No person
-			return;
-		}
-		const auto& ids = datum.poseIds;
 
-		constexpr uint PACKET_LIMIT = 8192 - 276; // 276 is one skelten packets
+		bool hasSkeletons = dimensions == 2;
 
 		// Start OSC bundle
 		OSCPP::Client::Packet packet(buffer, sizeof(buffer));
 		packet.openBundle(1234ULL);
 
-		for (int person = 0; person < persons; person++)
+		// /frame message
 		{
-			packet.openMessage("/skeleton", 1 + parts * dimensions);
-			packet.int32(ids[{0, person}]);
-
-			for (int part = 0; part < parts; part++)
-			{
-				// Should Send all info
-				//for (int dim = 0; dim < dimensions; dim++) {
-				//	packet.float32(poseKeypoints[{person, part, dim}]);
-				//}
-				// invert Y
-				packet.float32(keypoints[{person, part, 0}]);
-				packet.float32(1.f - keypoints[{person, part, 1}]); // invert Y
-			}
+			packet.openMessage("/frame", 1);
+			packet.int32((int32_t)datum.frameNumber);
 			packet.closeMessage();
+		}
 
-			if (packet.size() >= PACKET_LIMIT) {
-				break;
+		if (hasSkeletons)
+		{
+			// /skeleton messages
+			const auto& ids = datum.poseIds;
+
+			// 276 is one skelten packets
+			constexpr uint PACKET_LIMIT = 8192 - 276;
+
+			for (int person = 0; person < persons; person++)
+			{
+				packet.openMessage("/skeleton", 1 + parts * dimensions);
+				packet.int32(ids[{0, person}]);
+
+				for (int part = 0; part < parts; part++)
+				{
+					// Should Send all info
+					//for (int dim = 0; dim < dimensions; dim++) {
+					//	packet.float32(poseKeypoints[{person, part, dim}]);
+					//}
+					// invert Y
+					packet.float32(keypoints[{person, part, 0}]);
+					packet.float32(1.f - keypoints[{person, part, 1}]); // invert Y
+				}
+				packet.closeMessage();
+
+				if (packet.size() >= PACKET_LIMIT) {
+					break;
+				}
 			}
 		}
 
