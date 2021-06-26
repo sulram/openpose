@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include <asio.hpp>
+#include <boost/asio.hpp>
 #include <oscpp/client.hpp>
 #include <openpose/headers.hpp>
 
@@ -13,10 +13,10 @@ public:
 
 	OscOutput(const std::string& host, const int& port, const bool showImage) :
 		service{},
-		socket{ service, asio::ip::udp::endpoint(asio::ip::udp::v4(), 0) },
+		socket{ service, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0) },
 		showImage{ showImage }
 	{
-		using asio::ip::udp;
+		using boost::asio::ip::udp;
 
 		udp::resolver resolver{ service };
 		udp::resolver::query query{ udp::v4(), host, std::to_string(port) };
@@ -66,9 +66,9 @@ public:
 	}
 
 private:
-	asio::io_service service;
-	asio::ip::udp::socket socket;
-	asio::ip::udp::endpoint endpoint;
+	boost::asio::io_service service;
+	boost::asio::ip::udp::socket socket;
+	boost::asio::ip::udp::endpoint endpoint;
 	char buffer[8192];
 	bool showImage = false;
 
@@ -126,6 +126,6 @@ private:
 		}
 
 		packet.closeBundle();
-		socket.send_to(asio::buffer(buffer, packet.size()), endpoint);
+		socket.send_to(boost::asio::buffer(buffer, packet.size()), endpoint);
 	}
 };
